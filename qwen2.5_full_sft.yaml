@@ -1,0 +1,72 @@
+### model
+
+# model_name_or_path: Qwen/Qwen2.5-0.5B-Instruct
+# model_name_or_path: Qwen/Qwen2.5-1.5B-Instruct
+model_name_or_path: Qwen/Qwen2.5-3B-Instruct
+# model_name_or_path: Qwen/Qwen2.5-7B-Instruct
+# model_name_or_path: Qwen/Qwen2.5-7B-Math-Instruct-rope300k
+
+### method
+stage: sft
+do_train: true
+finetuning_type: full
+deepspeed: examples/deepspeed/ds_z3_config.json
+
+### dataset
+# dataset: OpenR1-Math-196k-verified
+# dataset: OpenR1-Math-196k-verified-2%
+# dataset: OpenR1-Math-196k-verified-2%-3B-evol-1-correct
+# dataset: OpenR1-Math-196k-verified-2%-7B-evol-2-correct
+# dataset: OpenR1-Math-196k-verified-5%
+# dataset: OpenR1-Math-196k-verified-10%
+dataset: OpenR1-Math-196k-verified-5%-3B-evol-1-correct
+# dataset: OpenR1-Math-196k-verified-5%-7B-evol-1-correct
+
+template: qwen
+cutoff_len: 16384
+overwrite_cache: true
+preprocessing_num_workers: 16
+
+### output
+# output_dir: saves/qwen2.5-7b/full/OpenR1-Math-196k-verified
+# output_dir: saves/qwen2.5-3b/full/OpenR1-Math-196k-verified-2%
+# output_dir: saves/qwen2.5-7b/full/OpenR1-Math-196k-verified-2%
+# output_dir: saves/qwen2.5-7b/full/OpenR1-Math-196k-verified-5%
+# output_dir: saves/qwen2.5-3b/full/OpenR1-Math-196k-verified-10%
+# output_dir: saves/qwen2.5-7b/full/OpenR1-Math-196k-verified-10%
+# output_dir: saves/qwen2.5-math-7b/full/OpenR1-Math-196k-verified
+# output_dir: saves/qwen2.5-math-7b/full/OpenR1-Math-196k-verified-2%
+# output_dir: saves/qwen2.5-math-7b/full/OpenR1-Math-196k-verified-5%
+# output_dir: saves/qwen2.5-math-7b/full/OpenR1-Math-196k-verified-10%
+# output_dir: saves/qwen2.5-3b/full/OpenR1-Math-196k-verified-2%-3B-evol-1-correct
+# output_dir: saves/qwen2.5-7b/full/OpenR1-Math-196k-verified-2%-7B-evol-1-correct
+# output_dir: saves/qwen2.5-7b/full/OpenR1-Math-196k-verified-2%-7B-evol-2-correct
+output_dir: saves/qwen2.5-3b/full/OpenR1-Math-196k-verified-5%-3B-evol-1-correct
+# output_dir: saves/qwen2.5-1.5b/full/OpenR1-Math-196k-verified-2%-evol-1-correct
+# output_dir: saves/qwen2.5-7b/full/OpenR1-Math-196k-verified-5%-7B-evol-1-correct
+
+
+logging_steps: 10
+save_steps: 100000000
+plot_loss: true
+overwrite_output_dir: true
+
+### train
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 4
+learning_rate: 5.0e-5
+num_train_epochs: 5.0
+# num_train_epochs: 4.0
+# num_train_epochs: 3.0
+# num_train_epochs: 1.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+bf16: true
+ddp_timeout: 180000000
+
+flash_attn: fa2
+enable_liger_kernel: true
+use_unsloth_gc: true
+gradient_checkpointing: true
+disable_gradient_checkpointing: false
+torch_empty_cache_steps: 10
