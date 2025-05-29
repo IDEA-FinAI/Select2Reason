@@ -1,0 +1,6 @@
+transformers
+torch
+vllm
+flash_attn
+latex2sympy2
+word2number
