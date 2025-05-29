@@ -84,9 +84,8 @@ def infer(args):
             with open(f"eval_data/{test_set}/test.jsonl") as f:
                 test_samples = [json.loads(line) for line in f]
                 
-            total_avg = 0
-            total_cons = 0
             total_pass = 0
+            total_maj = 0
             total_output_tokens = 0
             
             os.makedirs(f"eval_logs/{test_set}/{model_name}", exist_ok=True)
@@ -115,7 +114,6 @@ def infer(args):
                     pred_answers = [extract_answer(response) for response in responses]
                     output_tokens = [len(output.outputs[i].token_ids) for i in range(n_sampling)]
                     
-                    avg = 0
                     pas = 0
                     for i in range(n_sampling):
                         log.write(f"LLM Response {i + 1}: {responses[i]}\n")
@@ -124,8 +122,7 @@ def infer(args):
                             log.write("Answer not found\n")
                         is_correct = check_is_correct(pred_answers[i], gold_ans, gold_choice)
                         if is_correct:
-                            avg += 1
-                            pas = 1
+                            pas += 1
                             log.write("Check Current Answer: Correct\n")
                         else:
                             log.write("Check Current Answer: Incorrect\n")
@@ -136,35 +133,30 @@ def infer(args):
                     avg_output_tokens = sum(output_tokens) / n_sampling
                     total_output_tokens += avg_output_tokens                    
 
-                    # avg@n
-                    log.write(f"avg@{n_sampling}: {avg / n_sampling:.3f}\n")
-                    total_avg += avg / n_sampling
+                    # pass@1
+                    log.write(f"pass@1: {pas / n_sampling:.3f}\n")
+                    total_pass += pas / n_sampling
                     
-                    # pass@n
-                    log.write(f"pass@{n_sampling}: {pas:.3f}\n")
-                    total_pass += pas
-                    
-                    # cons@n
+                    # maj@16
                     counter = Counter([ans for ans in pred_answers if ans != ''])
                     log.write(f"Counter: {counter}\n")
                     if counter:
-                        cons_answer = counter.most_common(1)[0][0]
+                        maj_answer = counter.most_common(1)[0][0]
                     else:
-                        cons_answer = None
-                    log.write(f"Consistent Answer: {cons_answer}\n")
-                    cons_is_correct = check_is_correct(cons_answer, gold_ans, gold_choice) if cons_answer else False
-                    if cons_is_correct:
-                        log.write("Check Consistent Answer: Correct\n")
-                        total_cons += 1
+                        maj_answer = None
+                    log.write(f"Majority Answer: {maj_answer}\n")
+                    maj_is_correct = check_is_correct(maj_answer, gold_ans, gold_choice) if maj_answer else False
+                    if maj_is_correct:
+                        log.write("Check Majority Answer: Correct\n")
+                        total_maj += 1
                     else:
-                        log.write("Check Consistent Answer: Incorrect\n")
+                        log.write("Check Majority Answer: Incorrect\n")
                         
                     log.write("*" * 50 + "\n")
                 
                 log.write(f"Total samples count: {len(test_samples)}\n")
-                log.write(f"Total avg@{n_sampling}: {total_avg / len(test_samples):.3f}\n")
-                log.write(f"Total pass@{n_sampling}: {total_pass / len(test_samples):.3f}\n")
-                log.write(f"Total cons@{n_sampling}: {total_cons / len(test_samples):.3f}\n")
+                log.write(f"Total pass@1: {total_pass / len(test_samples):.3f}\n")
+                log.write(f"Total maj@{n_sampling}: {total_maj / len(test_samples):.3f}\n")
                 log.write(f"Average length of output tokens: {total_output_tokens / len(test_samples):.2f}\n")
     
     batch_infer(normal_test_sets, temperature=0, top_p=1, n_sampling=1)
